@@ -15,7 +15,7 @@ export default function LoginPage() {
         await loginUser(userData);
     };
 
-    async function loginUser(userData) {
+    async function loginUser(userData: { email: string; password: string; }) {
         console.log(userData);
         const response = await fetch('https://checking-app.up.railway.app/api/autenticacion/inicio-sesion', {
             method: 'POST',
