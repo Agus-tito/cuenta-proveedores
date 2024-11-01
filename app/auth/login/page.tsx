@@ -6,6 +6,7 @@ import { useState } from 'react';
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [cuit, setCuit] = useState('');
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -13,11 +14,12 @@ export default function LoginPage() {
         const userData = {
             email: email,
             password: password,
+            cuit: cuit,
         };
         await loginUser(userData);
     };
 
-    async function loginUser(userData: { email: string; password: string; }) {
+    async function loginUser(userData: { email: string; password: string; cuit: string }) {
         console.log(userData);
         const response = await fetch('https://checking-app.up.railway.app/api/autenticacion/inicio-sesion', {
             method: 'POST',
@@ -46,7 +48,7 @@ export default function LoginPage() {
                     className="h-full w-full object-cover"
                 />
             </div>
-
+ 
             {/* Contenido del lado derecho */}
             <div className="flex w-full flex-col lg:w-1/2">
                 {/* Header */}
@@ -109,9 +111,23 @@ export default function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
+                        <div className="mb-4">
+                            <label className="block mb-2" htmlFor="cuit">
+                                Cuit
+                            </label>
+                            <input
+                                type="text"
+                                id="cuit"
+                                placeholder="Ingrese su cuit"
+                                className="border rounded w-full p-2"
+                                required
+                                value={cuit}
+                                onChange={(e) => setCuit(e.target.value)}
+                            />
+                        </div>
                         <button
                             type="submit"
-                            className="bg-red-600 hover:bg-red-800 text-white rounded w-full py-2"
+                            className="bg-red-600 hover:bg-red-800 text-white rounded w-full py-2 mt-3"
                         >
                             Iniciar Sesión
                         </button>

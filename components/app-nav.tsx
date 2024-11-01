@@ -15,7 +15,6 @@ import {
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbList,
-    BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
@@ -27,21 +26,19 @@ export function AppNavbar() {
 
     return (
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 justify-between">
-            <SidebarTrigger className="-ml-1" />
+            <SidebarTrigger className="-ml-1 fixed" />
 
-            <Breadcrumb>
+            <Breadcrumb className="pl-10">
                 <BreadcrumbList>
                     {pathSegments.map((segment, index) => {
                         const href = '/' + pathSegments.slice(0, index + 1).join('/');
                         return (
-                            <div key={index}>
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink href={href} className="text-lg font-medium">
-                                        {segment.charAt(0).toUpperCase() + segment.slice(1)}
-                                    </BreadcrumbLink>
-                                    {index < pathSegments.length - 1 && <BreadcrumbSeparator />}
-                                </BreadcrumbItem>
-                            </div>
+                            <BreadcrumbItem key={index}>
+                                <BreadcrumbLink href={href} className="text-lg font-medium">
+                                    {segment.charAt(0).toUpperCase() + segment.slice(1)}
+                                </BreadcrumbLink>
+                                {index < pathSegments.length - 1 && <BreadcrumbSeparator />}
+                            </BreadcrumbItem>
                         );
                     })}
                 </BreadcrumbList>

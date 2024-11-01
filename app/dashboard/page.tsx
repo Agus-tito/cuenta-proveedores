@@ -91,8 +91,7 @@ export default function Page() {
                 </CardContent>
               </div>
               <Calendar
-                mode="single"
-                className=""
+                mode="multiple"
               />
             </Card>
             <Card>

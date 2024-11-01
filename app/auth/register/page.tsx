@@ -1,7 +1,50 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from 'react';
 
 export default function RegisterPage() {
+    const [name, setName] = useState('');
+    const [surname, setSurname] = useState('');
+    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [cuit, setCuit] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const userData = {
+            name: name,
+            surname: surname,
+            cuit: cuit,
+            email: email,
+            phone: phone,
+            password: password,
+        };
+        await RegisterUser(userData);
+    };
+
+    async function RegisterUser(userData: { name: string; surname: string; cuit: string; email: string; phone: string; password: string;}) {
+
+        console.log(userData);
+        
+        const response = await fetch('https://checking-app.up.railway.app/api/autenticacion/registro', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Registro exitoso:', data);
+        } else {
+            console.error('Error en el registro:', await response.text());
+        }
+    }
+
     return (
         <div className="flex bg-black text-white w-full h-screen">
             <div className="hidden w-1/2 lg:block">
@@ -42,8 +85,8 @@ export default function RegisterPage() {
                             Ingresa tus datos para crear una cuenta.
                         </p>
                     </div>
-                    <form>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <form onSubmit={handleSubmit}>
+                        <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
                             <div className="mb-4">
                                 <label className="block mb-2" htmlFor="name">
                                     Nombre
@@ -54,6 +97,8 @@ export default function RegisterPage() {
                                     placeholder="Ingrese nombre"
                                     className="border rounded w-full p-2"
                                     required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
                                 />
                             </div>
                             <div className="mb-4">
@@ -66,6 +111,22 @@ export default function RegisterPage() {
                                     placeholder="Ingrese apellido"
                                     className="border rounded w-full p-2"
                                     required
+                                    value={surname}
+                                    onChange={(e) => setSurname(e.target.value)}
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block mb-2" htmlFor="cuit">
+                                    Cuit
+                                </label>
+                                <input
+                                    type="text"
+                                    id="cuit"
+                                    placeholder="Ingrese cuit"
+                                    className="border rounded w-full p-2"
+                                    required
+                                    value={cuit}
+                                    onChange={(e) => setCuit(e.target.value)}
                                 />
                             </div>
                             <div className="mb-4">
@@ -78,8 +139,11 @@ export default function RegisterPage() {
                                     placeholder="Ingrese email"
                                     className="border rounded w-full p-2"
                                     required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
+                            
                             <div className="mb-4">
                                 <label className="block mb-2" htmlFor="phone">
                                     Teléfono
@@ -90,6 +154,8 @@ export default function RegisterPage() {
                                     placeholder="Ingrese número de teléfono"
                                     className="border rounded w-full p-2"
                                     required
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
                                 />
                             </div>
                             <div className="mb-4">
@@ -102,12 +168,14 @@ export default function RegisterPage() {
                                     placeholder="Ingrese su contraseña"
                                     className="border rounded w-full p-2"
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
                         </div>
                         <button
                             type="submit"
-                            className="bg-red-600 hover:bg-red-800 text-white rounded w-full py-2"
+                            className="bg-red-600 hover:bg-red-800 text-white rounded w-full py-2 mt-3"
                         >
                             Registarse
                         </button>
