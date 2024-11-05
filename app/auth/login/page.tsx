@@ -2,38 +2,35 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from 'react';
+import { redirect } from 'next/navigation';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [cuit, setCuit] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const userData = {
-            email: email,
-            password: password,
-            cuit: cuit,
-        };
+        const userData = { email, password, cuit };
         await loginUser(userData);
     };
 
     async function loginUser(userData: { email: string; password: string; cuit: string }) {
-        console.log(userData);
         const response = await fetch('https://checking-app.up.railway.app/api/autenticacion/inicio-sesion', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData),
         });
 
         if (response.ok) {
             const data = await response.json();
-            console.log('Registro exitoso:', data);
+            localStorage.setItem('token', data.token);
+            redirect('/dashboard');
         } else {
-            console.error('Error en el registro:', await response.text());
+            const errorMessage = await response.text();
+            setError('Error en el inicio de sesión: ' + errorMessage);
         }
     }
 
