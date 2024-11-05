@@ -18,7 +18,7 @@ export default function LoginPage() {
     };
 
     async function loginUser(userData: { email: string; password: string; cuit: string }) {
-        const response = await fetch('https://checking-app.up.railway.app/api/autenticacion/inicio-sesion', {
+        const response = await fetch('https://cuenta-proveedores.up.railway.app/api/autenticacion/inicio-sesion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData),
