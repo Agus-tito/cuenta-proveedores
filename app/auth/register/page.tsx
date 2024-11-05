@@ -29,7 +29,7 @@ export default function RegisterPage() {
 
         console.log(userData);
         
-        const response = await fetch('https://checking-app.up.railway.app/api/autenticacion/registro', {
+        const response = await fetch('https://cuenta-proveedores.up.railway.app/api/autenticacion/registro', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
