@@ -4,8 +4,15 @@ import { DollarSign, Users, ReceiptText, ArrowLeftRight, CalendarDays } from 'lu
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar } from "@/components/ui/calendar";
+import { useAuth } from "@/lib/authContext";
 
 export default function Page() {
+
+  //esto es para traer el token
+  // const {getToken} = useAuth();
+  //  const data = getToken();
+  //   console.log(data);
+
   return (
     <div>
       <main className="flex-1 overflow-y-auto p-6">
