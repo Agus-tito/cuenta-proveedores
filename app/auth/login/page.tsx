@@ -1,19 +1,19 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState  } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/authContext";
-import { useRouter } from "next/navigation";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [cuit, setCuit] = useState("");
   const [error, setError] = useState("");
-  const {login} = useAuth();
- 
+  const { login } = useAuth();
 
-  const handleLogin =  async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await fetch(
@@ -136,7 +136,15 @@ export default function LoginPage() {
             >
               Iniciar Sesión
             </button>
-            {error && <p className="text-red-500 mt-2">{error}</p>}
+            {error && error.trim() !== "" && (
+              <Alert variant="destructive" className="mt-3">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>
+                  <p>{error}</p>
+                </AlertDescription>
+              </Alert>
+            )}
           </form>
         </main>
       </div>
