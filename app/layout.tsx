@@ -1,18 +1,25 @@
+"use client";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from '@/components/theme-provider';
+import { AuthProvider } from '@/lib/authContext';
+import { ProtectedRoute } from '@/components/protectedRoute';
 
-export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>){
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <body>
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="dark" 
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-        </ThemeProvider>
+        <AuthProvider>
+          <ProtectedRoute>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </ProtectedRoute>
+        </AuthProvider>
       </body>
     </html>
   );

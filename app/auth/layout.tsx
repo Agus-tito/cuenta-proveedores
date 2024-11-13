@@ -1,5 +1,18 @@
-export default function AuthLayout({children,}: {
-    children: React.ReactNode
+import { ProtectedRoute } from "@/components/protectedRoute";
+import { AuthProvider } from "@/lib/authContext";
+
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
 }) {
-    return <div className="auth-layout w-full h-screen flex justify-center items-center">{children}</div>
+  return (
+    <AuthProvider>
+      <ProtectedRoute>
+        <div className="auth-layout w-full h-screen flex justify-center items-center">
+          {children}
+        </div>
+      </ProtectedRoute>
+    </AuthProvider>
+  );
 }

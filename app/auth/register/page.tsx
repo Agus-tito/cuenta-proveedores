@@ -2,6 +2,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { useAuth } from "@/lib/authContext";
 
 export default function RegisterPage() {
     const [name, setName] = useState('');
@@ -10,41 +12,32 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [cuit, setCuit] = useState('');
+    const [error, setError] = useState("");
+    const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const userData = {
-            name: name,
-            surname: surname,
-            cuit: cuit,
-            email: email,
-            phone: phone,
-            password: password,
-        };
-        await RegisterUser(userData);
-    };
-
-    async function RegisterUser(userData: { name: string; surname: string; cuit: string; email: string; phone: string; password: string;}) {
-
-        console.log(userData);
-        
-        const response = await fetch('https://cuenta-proveedores.up.railway.app/api/autenticacion/registro', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData),
-        });
-
+    const handleRegister =  async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      try {
+        const response = await fetch(
+          "https://cuenta-proveedores.up.railway.app/api/autenticacion/registro",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, surname, phone, email, password, cuit }),
+          }
+        );
+  
         if (response.ok) {
-            const data = await response.json();
-            console.log('Registro exitoso:', data);
+            router.push("/auth/login");
         } else {
-            console.error('Error en el registro:', await response.text());
+          console.log(await response.text());
+          setError("Credenciales incorrectas");
         }
-    }
-
+      } catch (err) {
+        console.error("Error al registrarse:", err);
+        setError("Ocurrió un error. Por favor, inténtalo de nuevo.");
+      }
+    };
     return (
         <div className="flex bg-black text-white w-full h-screen">
             <div className="hidden w-1/2 lg:block">
@@ -85,7 +78,7 @@ export default function RegisterPage() {
                             Ingresa tus datos para crear una cuenta.
                         </p>
                     </div>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleRegister}>
                         <div className="grid grid-cols-1 gap-x-3 md:grid-cols-2">
                             <div className="mb-4">
                                 <label className="block mb-2" htmlFor="name">
@@ -179,6 +172,7 @@ export default function RegisterPage() {
                         >
                             Registarse
                         </button>
+                        {error && <p className="text-red-500 mt-2">{error}</p>}
                     </form>
                 </main>
             </div>
