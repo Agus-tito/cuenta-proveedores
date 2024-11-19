@@ -29,7 +29,7 @@ export default function LoginPage() {
         const data = await response.json();
         login(data.token);
       } else {
-        console.log(await response.text());
+        console.log("Error: ", await response.text());
         setError("Credenciales incorrectas");
       }
     } catch (err) {
