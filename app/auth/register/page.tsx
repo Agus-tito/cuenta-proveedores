@@ -30,7 +30,7 @@ export default function RegisterPage() {
       if (response.ok) {
         router.push("/auth/login");
       } else {
-        setError("Credenciales incorrectas");
+        setError(await response.text());
       }
     } catch (err) {
       console.error("Error al registrarse:", err);
