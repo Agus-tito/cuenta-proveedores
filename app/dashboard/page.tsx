@@ -8,11 +8,6 @@ import { useAuth } from "@/lib/authContext";
 
 export default function Page() {
 
-  //esto es para traer el token
-  // const {getToken} = useAuth();
-  //  const data = getToken();
-  //   console.log(data);
-
   return (
     <div>
       <main className="flex-1 overflow-y-auto p-6">

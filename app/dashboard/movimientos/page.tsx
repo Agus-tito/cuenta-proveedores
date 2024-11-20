@@ -16,51 +16,44 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/lib/authContext'
 
-const movimientos = [
-    {
-        id: '1',
-        importeMovimiento: 1500000,
-        medioPago: 'Transferencia',
-        comentarioMovimiento: 'Pago a Proveedor A',
-        fechaAltaMovimiento: new Date('2023-01-01T10:00:00'),
-        comprobantes: new Set(),
-    },
-    {
-        id: '2',
-        importeMovimiento: 7500000,
-        medioPago: 'Efectivo',
-        comentarioMovimiento: 'Pago a Proveedor B',
-        fechaAltaMovimiento: new Date('2023-01-02T11:00:00'),
-        comprobantes: new Set(),
-    },
-    {
-        id: '3',
-        importeMovimiento: 2000000,
-        medioPago: 'Tarjeta de Crédito',
-        comentarioMovimiento: 'Pago a Proveedor C',
-        fechaAltaMovimiento: new Date('2023-01-03T12:00:00'),
-        comprobantes: new Set(),
-    },
-    {
-        id: '4',
-        importeMovimiento: 1000000,
-        medioPago: 'Cheque',
-        comentarioMovimiento: 'Pago a Proveedor D',
-        fechaAltaMovimiento: new Date('2023-01-04T13:00:00'),
-        comprobantes: new Set(),
-    },
-    {
-        id: '5',
-        importeMovimiento: 3000000,
-        medioPago: 'Transferencia',
-        comentarioMovimiento: 'Pago a Proveedor E',
-        fechaAltaMovimiento: new Date('2023-01-05T14:00:00'),
-        comprobantes: new Set(),
-    },
-];
+  export default function Page() {
+    const [movimientos, setMovimientos] = useState<any[]>([])
+    const { getToken } = useAuth();
+    const token = getToken();
+  
+    useEffect(() => {
+      const fetchMovimientos = async () => {
+        try {
+          const response = await fetch(
+            "https://cuenta-proveedores.up.railway.app/api/movimientos/ver",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error("Error al obtener los movimientos");
+          }
+          const data = await response.json();
+          setMovimientos(data);
+        } catch (error) {
+          console.error("Error al obtener movimientos:", error);
+        }
+      };
+      if (token) {
+        fetchMovimientos();
+      } else {
+        console.error("No se encontró el token");
+      }
+    }, [token]); 
+    
 
-export default function Page() {
   return (
     <main className="flex-1 overflow-y-auto p-6">
       <Card>
