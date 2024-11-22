@@ -21,9 +21,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const token = Cookies.get("token");
     if (token) {
+      console.log(token)
       setIsAuthenticated(!!token);
     } else {
-      setIsAuthenticated(false);
+      setIsAuthenticated(false);//Si queres evitar el login ponelo en true pero no vas a tener el token pa las apis
     }
   }, [router]);
 
