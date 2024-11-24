@@ -17,6 +17,7 @@ import { fetchMovimientos, crearMovimiento } from "@/lib/services/movimientos";
 
 export default function Page() {
   const [movimientos, setMovimientos] = useState<any[]>([]);
+  const [selectedMovimiento, setSelectedMovimiento] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     importeMovimiento: 0,
@@ -50,17 +51,22 @@ export default function Page() {
 
     try {
       const nuevo = await crearMovimiento(token, formData);
-      if(nuevo){
+      if (nuevo) {
         // setMovimientos([...movimientos, nuevo]);
         window.location.reload();
         setIsModalOpen(false);
-      }else{
+      } else {
         //error papi
       }
-    
     } catch (error) {
       console.error(error);
     }
+  };
+
+  // Manejar la apertura del modal para ver un movimiento
+  const handleVerMovimiento = (movimiento: any) => {
+    setSelectedMovimiento(movimiento);
+    setIsModalOpen(true);
   };
 
   return (
@@ -107,17 +113,17 @@ export default function Page() {
                           "es-AR",
                           {
                             year: "numeric",
-                            month: "long", 
+                            month: "long",
                             day: "numeric",
-                            hour: "numeric", 
-                            minute: "numeric", 
+                            hour: "numeric",
+                            minute: "numeric",
                           }
                         )
                       : "Fecha no disponible"}
                   </TableCell>
 
                   <TableCell className="text-right space-x-2">
-                    <Button>
+                    <Button onClick={() => handleVerMovimiento(movimiento)}>
                       <Eye className="md:mr-2 h-4 w-4" />
                       <p className="hidden md:block">Ver</p>
                     </Button>
@@ -133,6 +139,7 @@ export default function Page() {
         </CardContent>
       </Card>
 
+      {/* Modal para agregar un movimiento */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-gray-100 p-8 rounded-xl shadow-2xl w-full max-w-lg">
@@ -205,6 +212,85 @@ export default function Page() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para mostrar detalles del movimiento */}
+      {isModalOpen && selectedMovimiento && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg text-black">
+            {/* Título del modal */}
+            <h2 className="text-2xl font-bold text-black-900 border-b pb-3 mb-4">
+              Detalle del Movimiento
+            </h2>
+
+            {/* Contenido del modal */}
+            <div className="space-y-4 text-black">
+              <div className="flex justify-between">
+                <span className="font-semibold">ID:</span>
+                <span>{selectedMovimiento.id}</span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="font-semibold">Importe:</span>
+                <span>${selectedMovimiento.importeMovimiento}</span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="font-semibold">Medio de Pago:</span>
+                <span>{selectedMovimiento.medioPago}</span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="font-semibold">Comentario:</span>
+                <span>{selectedMovimiento.comentarioMovimiento}</span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="font-semibold">Fecha Alta:</span>
+                <span>
+                  {new Date(
+                    selectedMovimiento.fechaAltaMovimiento
+                  ).toLocaleString()}
+                </span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="font-semibold">Cuenta ID:</span>
+                <span>{selectedMovimiento.cuentaId || "Sin asignar"}</span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="font-semibold">Comprobantes:</span>
+                <span>
+                  {selectedMovimiento.comprobantes.length > 0
+                    ? selectedMovimiento.comprobantes.join(", ")
+                    : "Ninguno"}
+                </span>
+              </div>
+              <hr />
+              <div className="flex justify-between">
+                <span className="font-semibold">Validez:</span>
+                <span>
+                  {selectedMovimiento.isValid === null
+                    ? "Sin verificar"
+                    : selectedMovimiento.isValid
+                    ? "Válido"
+                    : "Inválido"}
+                </span>
+              </div>
+            </div>
+
+            {/* Botón para cerrar */}
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-5 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-transform transform hover:scale-105"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}
