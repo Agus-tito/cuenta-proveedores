@@ -85,7 +85,7 @@ export default function Page() {
       );
 
       if (response.ok) {
-        obtenerComprobantes(); // Llama a la función para obtener todos los comprobantes
+        obtenerComprobantes();
       } else {
         console.error("Error al cambiar el estado del comprobante");
         alert("No se pudo cambiar el estado del comprobante.");
@@ -259,68 +259,141 @@ export default function Page() {
 
       {/* Modal de agregar comprobante */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="text-black fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
-            <h2 className="text-xl font-bold mb-4">Agregar Comprobante</h2>
-            <form className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="tipoComprobante">Tipo de Comprobante</Label>
+            <h2 className="text-xl font-semibold mb-6">Agregar Comprobante</h2>
+            <form>
+              {/* Tipo de comprobante */}
+              <div className="mb-4">
+                <label
+                  htmlFor="tipoComprobante"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Tipo de Comprobante
+                </label>
                 <input
-                  type="text"
                   id="tipoComprobante"
                   name="tipoComprobante"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  type="text"
                   value={formData.tipoComprobante}
                   onChange={handleInputChange}
+                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="descripcion">Descripción</Label>
+
+              {/* Descripción */}
+              <div className="mb-4">
+                <label
+                  htmlFor="descripcion"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Descripción
+                </label>
                 <input
-                  type="text"
                   id="descripcion"
                   name="descripcion"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  type="text"
                   value={formData.descripcion}
                   onChange={handleInputChange}
+                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="nroComprobante">Número de Comprobante</Label>
+
+              {/* Número de comprobante */}
+              <div className="mb-4">
+                <label
+                  htmlFor="nroComprobante"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Número de Comprobante
+                </label>
                 <input
-                  type="number"
                   id="nroComprobante"
                   name="nroComprobante"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  type="number"
                   value={formData.nroComprobante}
                   onChange={handleInputChange}
+                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="fechaComprobante">Fecha</Label>
+
+              {/* Fecha de comprobante */}
+              <div className="mb-4">
+                <label
+                  htmlFor="fechaComprobante"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Fecha de Comprobante
+                </label>
                 <input
-                  type="date"
                   id="fechaComprobante"
                   name="fechaComprobante"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  type="date"
                   value={formData.fechaComprobante}
                   onChange={handleInputChange}
+                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="montoComprobante">Monto</Label>
+
+              {/* Monto de comprobante */}
+              <div className="mb-4">
+                <label
+                  htmlFor="montoComprobante"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Monto de Comprobante
+                </label>
                 <input
-                  type="number"
                   id="montoComprobante"
                   name="montoComprobante"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  type="number"
                   value={formData.montoComprobante}
                   onChange={handleInputChange}
+                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-              <Button className="mt-4 w-full" onClick={handleCreateComprobante}>
-                Crear Comprobante
-              </Button>
+              <div className="mb-4">
+                <label
+                  htmlFor="montoComprobante"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Asignar Movimiento
+                </label>
+                <div className="grid flex-1 gap-2">
+                  <Label htmlFor="link" className="sr-only">
+                    Movimientos
+                  </Label>
+                  <Select
+                    onValueChange={(value: any) => setSelectedMovimiento(value)}
+                  >
+                    <SelectTrigger id="movimiento">
+                      <SelectValue placeholder="Selecciona un movimiento" />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      {movimientos.map((movimiento) => (
+                        <SelectItem key={movimiento.id} value={movimiento.id}>
+                          {movimiento.comentarioMovimiento}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <Button
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-red-500 hover:bg-red-300 text-white"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleCreateComprobante}
+                  className="bg-blue-500 hover:bg-blue-300 text-white"
+                >
+                  Guardar
+                </Button>
+              </div>
             </form>
           </div>
         </div>
