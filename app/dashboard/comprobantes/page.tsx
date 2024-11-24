@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import {
   Select,
   SelectContent,
@@ -19,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   Dialog,
   DialogClose,
@@ -30,7 +28,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
@@ -40,9 +37,7 @@ import { fetchMovimientos } from "@/lib/services/movimientos";
 export default function Page() {
   const [comprobantes, setComprobantes] = useState<any[]>([]);
   const [movimientos, setMovimientos] = useState<any[]>([]);
-  const [selectedMovimiento, setSelectedMovimiento] = useState<string | null>(
-    null
-  );
+  const [selectedMovimiento, setSelectedMovimiento] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     tipoComprobante: "",
@@ -104,7 +99,6 @@ export default function Page() {
   const validComprobantes = comprobantes.filter((comprobante) => comprobante.isValid);
   const invalidComprobantes = comprobantes.filter((comprobante) => !comprobante.isValid);
 
-
   // Obtener todos los movimientos
   useEffect(() => {
     const obtenerMovimientos = async () => {
@@ -138,8 +132,10 @@ export default function Page() {
 
   // Asignar movimiento al comprobante
   const handleAsignarMovimiento = async (comprobanteId: string) => {
-    if (!token || !selectedMovimiento)
+    if (!token || !selectedMovimiento) {
       return console.error("No se encontró el token o movimiento seleccionado");
+    }
+
     try {
       const response = await fetch(
         "https://cuenta-proveedores.up.railway.app/api/comprobantes/asignar-comprobante",
@@ -156,11 +152,9 @@ export default function Page() {
         }
       );
       if (!response.ok) {
-        const errorData = await response.json(); // Obtener el cuerpo de la respuesta
+        const errorData = await response.json();
         throw new Error(
-          `Error al asignar el movimiento: ${
-            errorData.message || "Error desconocido"
-          }`
+          `Error al asignar el movimiento: ${errorData.message || "Error desconocido"}`
         );
       }
 
@@ -194,139 +188,70 @@ export default function Page() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {comprobantes && (
-                validComprobantes.map((comprobante) => {
-                  const movimiento = movimientos.find(m => m.id === comprobante.movimientoId);
-                  return (
-                    <TableRow key={comprobante.id}>
-                      <TableCell>{comprobante.tipoComprobante}</TableCell>
-                      <TableCell>{comprobante.descripcion}</TableCell>
-                      <TableCell>
-                        {comprobante.nroComprobante.toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(
-                          comprobante.fechaComprobante
-                        ).toLocaleString()}
-                      </TableCell>
-                      <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button>
-                              <Plus className="md:mr-2 h-4 w-4" />
-                              <p className="hidden md:block">Asignar</p>
-                            </Button>
-                          </DialogTrigger>
+              {validComprobantes.map((comprobante) => {
+                const movimiento = movimientos.find((m) => m.id === comprobante.movimientoId);
+                return (
+                  <TableRow key={comprobante.id}>
+                    <TableCell>{comprobante.tipoComprobante}</TableCell>
+                    <TableCell>{comprobante.descripcion}</TableCell>
+                    <TableCell>{comprobante.nroComprobante.toLocaleString()}</TableCell>
+                    <TableCell>{new Date(comprobante.fechaComprobante).toLocaleString()}</TableCell>
+                    <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Plus className="md:mr-2 h-4 w-4" />
+                            <p className="hidden md:block">Asignar</p>
+                          </Button>
+                        </DialogTrigger>
 
-                          <DialogContent className="sm:max-w-md">
-                            <DialogHeader>
-                              <DialogTitle>Asignar Movimiento</DialogTitle>
-                              <DialogDescription>
-                                Puedes asignarle un movimiento a este
-                                comprobante.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="flex items-center space-x-2">
-                              <div className="grid flex-1 gap-2">
-                                <Label htmlFor="link" className="sr-only">
-                                  Movimientos
-                                </Label>
-                                <Select
-                                  onValueChange={(value: any) =>
-                                    setSelectedMovimiento(value)
-                                  }
-                                >
-                                  <SelectTrigger id="movimiento">
-                                    <SelectValue placeholder="Selecciona un movimiento" />
-                                  </SelectTrigger>
-                                  <SelectContent position="popper">
-                                    {movimientos.map((movimiento) => (
-                                      <SelectItem
-                                        key={movimiento.id}
-                                        value={movimiento.id}
-                                      >
-                                        {movimiento.comentarioMovimiento}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Asignar Movimiento</DialogTitle>
+                            <DialogDescription>
+                              Puedes asignarle un movimiento a este comprobante.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex items-center space-x-2">
+                            <div className="grid flex-1 gap-2">
+                              <Label htmlFor="link" className="sr-only">
+                                Movimientos
+                              </Label>
+                              <Select onValueChange={(value: any) => setSelectedMovimiento(value)}>
+                                <SelectTrigger id="movimiento">
+                                  <SelectValue placeholder="Selecciona un movimiento" />
+                                </SelectTrigger>
+                                <SelectContent position="popper">
+                                  {movimientos.map((movimiento) => (
+                                    <SelectItem key={movimiento.id} value={movimiento.id}>
+                                      {movimiento.comentarioMovimiento}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
-                            <DialogFooter className="sm:justify-between">
-                              <DialogClose asChild>
-                                <Button type="button" variant="secondary">
-                                  Cerrar
-                                </Button>
-                              </DialogClose>
-                              <Button
-                                onClick={() =>
-                                  handleAsignarMovimiento(comprobante.id)
-                                }
-                              >
-                                Asignar
+                          </div>
+                          <DialogFooter className="sm:justify-between">
+                            <DialogClose asChild>
+                              <Button type="button" variant="secondary">
+                                Cerrar
                               </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                        <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
-                          <Trash className="md:mr-2 h-4 w-4" />
-                          <p className="hidden md:block">Cambiar Estado</p>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <Card className="mt-6">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-2xl font-bold">Comprobantes</CardTitle>
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="md:mr-2 h-4 w-4" />
-            <p className="hidden md:block">Agregar Comprobante</p>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tipo Comprobante</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead>Número Comprobante</TableHead>
-                <TableHead>Fecha Alta</TableHead>
-                <TableHead>Movimiento</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {comprobantes && (
-                invalidComprobantes.map((comprobante) => {
-                  const movimiento = movimientos.find(m => m.id === comprobante.movimientoId);
-                  return (
-                    <TableRow key={comprobante.id}>
-                      <TableCell>{comprobante.tipoComprobante}</TableCell>
-                      <TableCell>{comprobante.descripcion}</TableCell>
-                      <TableCell>
-                        {comprobante.nroComprobante.toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(comprobante.fechaComprobante).toLocaleString()}
-                      </TableCell>
-                      <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell> {/* Mostrar comentario */}
-                      <TableCell className="text-right space-x-2">
-                        <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
-                          <Trash className="md:mr-2 h-4 w-4" />
-                          <p className="hidden md:block">Cambiar Estado</p>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                            </DialogClose>
+                            <Button onClick={() => handleAsignarMovimiento(comprobante.id)}>
+                              Asignar
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                      <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
+                        <Trash className="md:mr-2 h-4 w-4" />
+                        <p className="hidden md:block">Cambiar Estado</p>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
@@ -336,139 +261,66 @@ export default function Page() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
-            <h2 className="text-xl font-semibold mb-6">Agregar Comprobante</h2>
-            <form>
-              {/* Tipo de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="tipoComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Tipo de Comprobante
-                </label>
+            <h2 className="text-xl font-bold mb-4">Agregar Comprobante</h2>
+            <form className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="tipoComprobante">Tipo de Comprobante</Label>
                 <input
+                  type="text"
                   id="tipoComprobante"
                   name="tipoComprobante"
-                  type="text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   value={formData.tipoComprobante}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-
-              {/* Descripción */}
-              <div className="mb-4">
-                <label
-                  htmlFor="descripcion"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Descripción
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="descripcion">Descripción</Label>
                 <input
+                  type="text"
                   id="descripcion"
                   name="descripcion"
-                  type="text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   value={formData.descripcion}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-
-              {/* Número de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="nroComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Número de Comprobante
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="nroComprobante">Número de Comprobante</Label>
                 <input
+                  type="number"
                   id="nroComprobante"
                   name="nroComprobante"
-                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   value={formData.nroComprobante}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-
-              {/* Fecha de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="fechaComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Fecha de Comprobante
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="fechaComprobante">Fecha</Label>
                 <input
+                  type="date"
                   id="fechaComprobante"
                   name="fechaComprobante"
-                  type="date"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   value={formData.fechaComprobante}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-
-              {/* Monto de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="montoComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Monto de Comprobante
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="montoComprobante">Monto</Label>
                 <input
+                  type="number"
                   id="montoComprobante"
                   name="montoComprobante"
-                  type="number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   value={formData.montoComprobante}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
                 />
               </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="montoComprobante"
-                  className="block text-sm font-medium text-black"
-                >
-                  Asignar Movimiento
-                </label>
-                <div className="grid flex-1 gap-2 text-black">
-                  <Label htmlFor="link" className="sr-only ">
-                    Movimientos
-                  </Label>
-                  <Select
-                    onValueChange={(value: any) => setSelectedMovimiento(value)}
-                  >
-                    <SelectTrigger id="movimiento">
-                      <SelectValue placeholder="Selecciona un movimiento" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      {movimientos.map((movimiento) => (
-                        <SelectItem key={movimiento.id} value={movimiento.id}>
-                          {movimiento.comentarioMovimiento}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3">
-                <Button
-                  onClick={() => setIsModalOpen(false)}
-                  className="bg-red-500 hover:bg-red-300 text-white"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleCreateComprobante}
-                  className="bg-blue-500 hover:bg-blue-300 text-white"
-                >
-                  Guardar
-                </Button>
-              </div>
+              <Button className="mt-4 w-full" onClick={handleCreateComprobante}>
+                Crear Comprobante
+              </Button>
             </form>
           </div>
         </div>
