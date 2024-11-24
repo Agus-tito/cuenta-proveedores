@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash, Eye } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,35 +26,34 @@ export default function Page() {
     emailProveedor: "",
     direccionProveedor: "",
   });
+  
   const { getToken } = useAuth();
   const token = getToken();
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //Para crear cuentas
+  // Para crear cuentas
   const handleCreateAccount = async () => {
     const newAccount = await createAccount(token, formData);
     if (newAccount) {
       setIsModalOpen(false);
-      setAccount((prev) => [...prev, newAccount]); //Agrego la cuenta a la lista
+      setAccount((prev) => [...prev, newAccount]); // Agrego la cuenta a la lista
     }
   };
 
-  //Para ver cuenta
+  // Para ver cuentas
   useEffect(() => {
-
     const fetchAllAccount = async () => {
       const data = await getAccount(token);
       if (data) {
-        console.log("cuenta encontradas: ", data)
+        console.log("Cuentas encontradas: ", data);
         setAccount(data);
       }
     };
 
-    //Si hay un token ejecuto la funcion para cargar las cuentas
+    // Si hay un token, ejecuta la función para cargar las cuentas
     if (token) {
       fetchAllAccount();
     }
@@ -74,13 +73,12 @@ export default function Page() {
           },
         }
       );
-      console.log("Respuesta recibida:", await response.json());
-      
+
       if (response.ok) {
         const updatedAccount = await response.json();
         console.log("Cuenta actualizada:", updatedAccount);
 
-        // Mover la cuenta a la lista según el nuevo estado
+        // Actualizar la lista de cuentas en el estado
         setAccount((prev) =>
           prev.map((account) =>
             account.id === updatedAccount.id ? updatedAccount : account
@@ -100,14 +98,13 @@ export default function Page() {
   const validAccounts = Account.filter((account) => account.isValid);
   const invalidAccounts = Account.filter((account) => !account.isValid);
 
-
   return (
     <main className="flex-1 overflow-y-auto p-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">Proveedores</CardTitle>
           <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="md:mr-2 h-4 w-4" />{" "}
+            <Plus className="md:mr-2 h-4 w-4" />
             <p className="hidden md:block">Agregar Proveedor</p>
           </Button>
         </CardHeader>
@@ -239,7 +236,6 @@ export default function Page() {
           </div>
         </div>
       )}
-
     </main>
   );
 }

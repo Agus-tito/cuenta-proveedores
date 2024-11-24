@@ -74,6 +74,35 @@ export default function Page() {
     obtenerComprobantes();
   }, [token]);
 
+  // Función para cambiar el estado del comprobante
+  const handleChangeComprobanteStatus = async (idComprobante: string) => {
+    try {
+      const response = await fetch(
+        `https://cuenta-proveedores.up.railway.app/api/comprobantes/cambiar-estado/${idComprobante}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        obtenerComprobantes(); // Llama a la función para obtener todos los comprobantes
+      } else {
+        console.error("Error al cambiar el estado del comprobante");
+        alert("No se pudo cambiar el estado del comprobante.");
+      }
+    } catch (error) {
+      console.error("Error al hacer la solicitud:", error);
+      alert("Hubo un error al cambiar el estado del comprobante.");
+    }
+  };
+
+  const validComprobantes = comprobantes.filter((comprobante) => comprobante.isValid);
+  const invalidComprobantes = comprobantes.filter((comprobante) => !comprobante.isValid);
+
 
   // Obtener todos los movimientos
   useEffect(() => {
@@ -154,7 +183,7 @@ export default function Page() {
             </TableHeader>
             <TableBody>
               {comprobantes && (
-                comprobantes.map((comprobante) => {
+                validComprobantes.map((comprobante) => {
                   const movimiento = movimientos.find(m => m.id === comprobante.movimientoId);
                   return (
                     <TableRow key={comprobante.id}>
@@ -166,7 +195,7 @@ export default function Page() {
                       <TableCell>
                         {new Date(comprobante.fechaComprobante).toLocaleString()}
                       </TableCell>
-                      <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell> {/* Mostrar comentario */}
+                      <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell>
                       <TableCell className="text-right space-x-2">
                         <Dialog>
                           <DialogTrigger asChild>
@@ -211,9 +240,59 @@ export default function Page() {
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
-                        <Button>
+                        <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
                           <Trash className="md:mr-2 h-4 w-4" />
-                          <p className="hidden md:block">Eliminar</p>
+                          <p className="hidden md:block">Cambiar Estado</p>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-2xl font-bold">Comprobantes</CardTitle>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="md:mr-2 h-4 w-4" />
+            <p className="hidden md:block">Agregar Comprobante</p>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tipo Comprobante</TableHead>
+                <TableHead>Descripción</TableHead>
+                <TableHead>Número Comprobante</TableHead>
+                <TableHead>Fecha Alta</TableHead>
+                <TableHead>Movimiento</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {comprobantes && (
+                invalidComprobantes.map((comprobante) => {
+                  const movimiento = movimientos.find(m => m.id === comprobante.movimientoId);
+                  return (
+                    <TableRow key={comprobante.id}>
+                      <TableCell>{comprobante.tipoComprobante}</TableCell>
+                      <TableCell>{comprobante.descripcion}</TableCell>
+                      <TableCell>
+                        {comprobante.nroComprobante.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(comprobante.fechaComprobante).toLocaleString()}
+                      </TableCell>
+                      <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell> {/* Mostrar comentario */}
+                      <TableCell className="text-right space-x-2">
+                        <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
+                          <Trash className="md:mr-2 h-4 w-4" />
+                          <p className="hidden md:block">Cambiar Estado</p>
                         </Button>
                       </TableCell>
                     </TableRow>
