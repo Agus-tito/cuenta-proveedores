@@ -256,6 +256,55 @@ export default function Page() {
           </Table>
         </CardContent>
       </Card>
+      <Card className="mt-6">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-2xl font-bold">Comprobantes dados de baja</CardTitle>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="md:mr-2 h-4 w-4" />
+            <p className="hidden md:block">Agregar Comprobante</p>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tipo Comprobante</TableHead>
+                <TableHead>Descripción</TableHead>
+                <TableHead>Número Comprobante</TableHead>
+                <TableHead>Fecha Alta</TableHead>
+                <TableHead>Movimiento</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {comprobantes && (
+                invalidComprobantes.map((comprobante) => {
+                  const movimiento = movimientos.find(m => m.id === comprobante.movimientoId);
+                  return (
+                    <TableRow key={comprobante.id}>
+                      <TableCell>{comprobante.tipoComprobante}</TableCell>
+                      <TableCell>{comprobante.descripcion}</TableCell>
+                      <TableCell>
+                        {comprobante.nroComprobante.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(comprobante.fechaComprobante).toLocaleString()}
+                      </TableCell>
+                      <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell> {/* Mostrar comentario */}
+                      <TableCell className="text-right space-x-2">
+                        <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
+                          <Trash className="md:mr-2 h-4 w-4" />
+                          <p className="hidden md:block">Cambiar Estado</p>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* Modal de agregar comprobante */}
       {isModalOpen && (
