@@ -11,12 +11,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+
+import { Label } from "@/components/ui/label"
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
 import { getComprobante, createComprobante } from "@/lib/services/comprobantes";
+import { fetchMovimientos } from "@/lib/services/movimientos";
 
 export default function Page() {
   const [comprobantes, setComprobantes] = useState<any[]>([]);
+  const [movimientos, setMovimientos] = useState<any[]>([]);
+  const [selectedMovimiento, setSelectedMovimiento] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     tipoComprobante: "",
@@ -33,18 +58,35 @@ export default function Page() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Para obtener todos los comprobantes
+  // Función para obtener todos los comprobantes
+  const obtenerComprobantes = async () => {
+    if (!token) return console.error("No se encontró el token");
+    try {
+      const data = await getComprobante(token);
+      setComprobantes(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Obtener todos los comprobantes al cargar el componente
   useEffect(() => {
-    const obtenerComprobantes = async () => {
+    obtenerComprobantes();
+  }, [token]);
+
+
+  // Obtener todos los movimientos
+  useEffect(() => {
+    const obtenerMovimientos = async () => {
       if (!token) return console.error("No se encontró el token");
       try {
-        const data = await getComprobante(token);
-        setComprobantes(data);
+        const data = await fetchMovimientos(token); // Asegúrate de que esta función obtenga los movimientos
+        setMovimientos(data);
       } catch (error) {
         console.error(error);
       }
     };
-    obtenerComprobantes();
+    obtenerMovimientos();
   }, [token]);
 
   // Para crear comprobantes
@@ -56,6 +98,33 @@ export default function Page() {
         setIsModalOpen(false);
         setComprobantes((prev) => [...prev, newComprobante]);
       }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Asignar movimiento al comprobante
+  const handleAsignarMovimiento = async (comprobanteId: string) => {
+    if (!token || !selectedMovimiento) return console.error("No se encontró el token o movimiento seleccionado");
+    try {
+      const response = await fetch("https://cuenta-proveedores.up.railway.app/api/comprobantes/asignar-comprobante", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idMovimiento: selectedMovimiento,
+          idComprobante: comprobanteId,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json(); // Obtener el cuerpo de la respuesta
+        throw new Error(`Error al asignar el movimiento: ${errorData.message || 'Error desconocido'}`);
+      }
+
+      obtenerComprobantes(); // Esta es la función que ya tienes en el useEffect
+      setIsModalOpen(false); // Cerrar el modal
     } catch (error) {
       console.error(error);
     }
@@ -75,50 +144,82 @@ export default function Page() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
                 <TableHead>Tipo Comprobante</TableHead>
                 <TableHead>Descripción</TableHead>
                 <TableHead>Número Comprobante</TableHead>
                 <TableHead>Fecha Alta</TableHead>
+                <TableHead>Movimiento</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {comprobantes.map((comprobante) => (
-                <TableRow key={comprobante.id}>
-                  <TableCell className="font-medium">
-                    {comprobante.id}
-                  </TableCell>
-                  <TableCell>{comprobante.tipoComprobante}</TableCell>
-                  <TableCell className="font-medium">
-                    {comprobante.id}
-                  </TableCell>
-                  <TableCell>{comprobante.tipo_comprobante}</TableCell>
-                  <TableCell>{comprobante.descripcion}</TableCell>
-                  <TableCell>
-                    {comprobante.nroComprobante.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(comprobante.fechaComprobante).toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    {comprobante.nroComprobante.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    {comprobante.fechaAltaComprobante.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button>
-                      <Eye className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Ver</p>
-                    </Button>
-                    <Button>
-                      <Trash className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Eliminar</p>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {comprobantes && (
+                comprobantes.map((comprobante) => {
+                  const movimiento = movimientos.find(m => m.id === comprobante.movimientoId);
+                  return (
+                    <TableRow key={comprobante.id}>
+                      <TableCell>{comprobante.tipoComprobante}</TableCell>
+                      <TableCell>{comprobante.descripcion}</TableCell>
+                      <TableCell>
+                        {comprobante.nroComprobante.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(comprobante.fechaComprobante).toLocaleString()}
+                      </TableCell>
+                      <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell> {/* Mostrar comentario */}
+                      <TableCell className="text-right space-x-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button>
+                              <Plus className="md:mr-2 h-4 w-4" />
+                              <p className="hidden md:block">Asignar</p>
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Asignar Movimiento</DialogTitle>
+                              <DialogDescription>
+                                Puedes asignarle un movimiento a este comprobante.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex items-center space-x-2">
+                              <div className="grid flex-1 gap-2">
+                                <Label htmlFor="link" className="sr-only">
+                                  Movimientos
+                                </Label>
+                                <Select onValueChange={(value) => setSelectedMovimiento(value)}>
+                                  <SelectTrigger id="movimiento">
+                                    <SelectValue placeholder="Selecciona un movimiento" />
+                                  </SelectTrigger>
+                                  <SelectContent position="popper">
+                                    {movimientos.map((movimiento) => (
+                                      <SelectItem key={movimiento.id} value={movimiento.id}>
+                                        {movimiento.comentarioMovimiento}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <DialogFooter className="sm:justify-between">
+                              <DialogClose asChild>
+                                <Button type="button" variant="secondary">
+                                  Cerrar
+                                </Button>
+                              </DialogClose>
+                              <Button onClick={() => handleAsignarMovimiento(comprobante.id)}>Asignar</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                        <Button>
+                          <Trash className="md:mr-2 h-4 w-4" />
+                          <p className="hidden md:block">Eliminar</p>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
