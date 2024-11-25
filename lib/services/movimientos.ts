@@ -44,3 +44,31 @@ export const crearMovimiento = async (token: string, formData: any) => {
         throw error;
     }
 };
+
+//cambiar estado movimiento
+export const cambiarEstadoMovimiento  = async (token: any, idMovimiento: string) => {
+    try {
+      const response = await fetch(
+        `https://cuenta-proveedores.up.railway.app/api/movimientos/cambiar-estado/${idMovimiento}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (response.ok) {
+        const updatemovimiento = await response.json();
+        return updatemovimiento;
+      } else {
+        throw new Error("No se pudo cambiar el estado del movimiento.");
+      }
+
+    } catch (error) {
+      console.error("Error al hacer la solicitud:", error);
+      throw error;
+    }
+  };
+

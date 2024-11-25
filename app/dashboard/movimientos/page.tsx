@@ -11,19 +11,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
-import { fetchMovimientos, crearMovimiento } from "@/lib/services/movimientos";
+import {
+  fetchMovimientos,
+  crearMovimiento,
+  cambiarEstadoMovimiento,
+} from "@/lib/services/movimientos";
+import { Label } from "@radix-ui/react-dropdown-menu";
+import { getAccount } from "@/lib/services/cuentas";
 
 export default function Page() {
   const [movimientos, setMovimientos] = useState<any[]>([]);
+  const [cuentas, setCuentas] = useState<any[]>([]);
+  const [movimientosBaja, setMovimientosBaja] = useState<any[]>([]);
   const [selectedMovimiento, setSelectedMovimiento] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     importeMovimiento: 0,
     medioPago: "",
     comentarioMovimiento: "",
+    cuentaId: "",
   });
+
   const { getToken } = useAuth();
   const token = getToken();
 
@@ -31,7 +48,21 @@ export default function Page() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //Para obtener todos los movimientos
+  // Obtener todas las cuentas disponibles
+  useEffect(() => {
+    const obtenerCuentas = async () => {
+      if (!token) return console.error("No se encontró el token");
+      try {
+        const cuentasData = await getAccount(token);
+        setCuentas(cuentasData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    obtenerCuentas();
+  }, [token]);
+
+  // Para obtener todos los movimientos
   useEffect(() => {
     const obtenerMovimientos = async () => {
       if (!token) return console.error("No se encontró el token");
@@ -52,30 +83,51 @@ export default function Page() {
     try {
       const nuevo = await crearMovimiento(token, formData);
       if (nuevo) {
-        // setMovimientos([...movimientos, nuevo]);
-        window.location.reload();
+        setMovimientos([...movimientos, nuevo]);
         setIsModalOpen(false);
-      } else {
-        //error papi
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Manejar la apertura del modal para ver un movimiento
+  // Para la apertura del modal para ver un movimiento
   const handleVerMovimiento = (movimiento: any) => {
     setSelectedMovimiento(movimiento);
     setIsModalOpen(true);
   };
 
+  // Función para cambiar el estado del movimiento
+  const handleCambiarEstado = async (movimiento: any) => {
+    if (!token) return console.error("No se encontró el token");
+
+    try {
+      const response = await cambiarEstadoMovimiento(token, movimiento.id);
+
+      if (response) {
+        if (response.fechaBajaMovimiento) {
+          setMovimientos(movimientos.filter((mov) => mov.id !== movimiento.id));
+          setMovimientosBaja([...movimientosBaja, response]);
+        } else {
+          setMovimientosBaja(
+            movimientosBaja.filter((mov) => mov.id !== movimiento.id)
+          );
+          setMovimientos([...movimientos, response]);
+        }
+      }
+    } catch (error) {
+      console.error("Error al cambiar el estado:", error);
+    }
+  };
+
   return (
     <main className="flex-1 overflow-y-auto p-6">
+      {/* Tabla de movimientos activos */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">Movimientos</CardTitle>
           <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="md:mr-2 h-4 w-4" />{" "}
+            <Plus className="md:mr-2 h-4 w-4" />
             <p className="hidden md:block">Agregar Movimientos</p>
           </Button>
         </CardHeader>
@@ -96,10 +148,7 @@ export default function Page() {
                 <TableRow key={movimiento.id}>
                   <TableCell className="font-medium">{movimiento.id}</TableCell>
                   <TableCell className="text-center">
-                    $
-                    {movimiento.importeMovimiento
-                      ? movimiento.importeMovimiento.toLocaleString()
-                      : "0"}
+                    ${movimiento.importeMovimiento?.toLocaleString() || "0"}
                   </TableCell>
                   <TableCell className="text-center">
                     {movimiento.medioPago}
@@ -121,15 +170,14 @@ export default function Page() {
                         )
                       : "Fecha no disponible"}
                   </TableCell>
-
                   <TableCell className="text-right space-x-2">
+                    <Button onClick={() => handleCambiarEstado(movimiento)}>
+                      <Trash className="md:mr-2 h-4 w-4" />
+                      <p className="hidden md:block">Dar Baja</p>
+                    </Button>
                     <Button onClick={() => handleVerMovimiento(movimiento)}>
                       <Eye className="md:mr-2 h-4 w-4" />
                       <p className="hidden md:block">Ver</p>
-                    </Button>
-                    <Button>
-                      <Trash className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Eliminar</p>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -139,6 +187,62 @@ export default function Page() {
         </CardContent>
       </Card>
 
+      {/* Tabla de movimientos dados de baja */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            Movimientos Dados de Baja
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-start">ID</TableHead>
+                <TableHead className="text-center">Importe</TableHead>
+                <TableHead className="text-center">Medio de Pago</TableHead>
+                <TableHead className="text-center">Comentario</TableHead>
+                <TableHead className="text-center">Fecha Baja</TableHead>
+                <TableHead className="text-end">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {movimientosBaja.map((movimiento) => (
+                <TableRow key={movimiento.id}>
+                  <TableCell className="font-medium">{movimiento.id}</TableCell>
+                  <TableCell className="text-center">
+                    ${movimiento.importeMovimiento}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {movimiento.medioPago}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {movimiento.comentarioMovimiento}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {new Date(movimiento.fechaBajaMovimiento).toLocaleString(
+                      "es-AR",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                      }
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button onClick={() => handleCambiarEstado(movimiento)}>
+                      <Plus className="md:mr-2 h-4 w-4" />
+                      <p className="hidden md:block">Dar Alta</p>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       {/* Modal para agregar un movimiento */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -195,6 +299,31 @@ export default function Page() {
                 />
               </div>
 
+              <div className="mb-4">
+                <label
+                  htmlFor="cuentaId"
+                  className="block text-sm font-medium text-black"
+                >
+                  Asignar Cuenta
+                </label>
+                <Select
+                  onValueChange={(value: string) =>
+                    setFormData({ ...formData, cuentaId: value })
+                  }
+                >
+                  <SelectTrigger id="cuentas">
+                    <SelectValue placeholder="Selecciona una cuenta" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    {cuentas.map((cuenta) => (
+                      <SelectItem key={cuenta.id} value={cuenta.id}>
+                        {cuenta.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -215,17 +344,14 @@ export default function Page() {
           </div>
         </div>
       )}
-
       {/* Modal para mostrar detalles del movimiento */}
       {isModalOpen && selectedMovimiento && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg text-black">
-            {/* Título del modal */}
             <h2 className="text-2xl font-bold text-black-900 border-b pb-3 mb-4">
               Detalle del Movimiento
             </h2>
 
-            {/* Contenido del modal */}
             <div className="space-y-4 overflow-y-auto max-h-96 pr-2">
               <div className="flex justify-between">
                 <span className="font-semibold">Importe:</span>
@@ -253,7 +379,7 @@ export default function Page() {
               <hr />
               <div>
                 <span className="font-semibold block mb-2">Comprobantes:</span>
-                {selectedMovimiento.comprobantes.length > 0 ? (
+                {selectedMovimiento?.comprobantes?.length > 0 ? (
                   <div className="space-y-2">
                     {selectedMovimiento.comprobantes.map((comprobante: any) => (
                       <div
@@ -297,7 +423,6 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Botón para cerrar */}
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setIsModalOpen(false)}
