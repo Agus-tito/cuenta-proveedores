@@ -14,7 +14,7 @@ import {
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
-import { getAccount, createAccount } from "@/lib/services/cuentas";
+import { getAccount, createAccount, ChangeAccountStatus } from "@/lib/services/cuentas";
 
 export default function Page() {
   const [Account, setAccount] = useState<any[]>([]);
@@ -26,7 +26,7 @@ export default function Page() {
     emailProveedor: "",
     direccionProveedor: "",
   });
-  
+
   const { getToken } = useAuth();
   const token = getToken();
 
@@ -44,59 +44,47 @@ export default function Page() {
   };
 
   // Para ver cuentas
-  useEffect(() => {
-    const fetchAllAccount = async () => {
+  const fetchAllAccount = async () => {
+    if (!token) return console.error("No se encontró el token");
+    try {
       const data = await getAccount(token);
-      if (data) {
-        console.log("Cuentas encontradas: ", data);
-        setAccount(data);
-      }
-    };
-
-    // Si hay un token, ejecuta la función para cargar las cuentas
-    if (token) {
-      fetchAllAccount();
+      setAccount(data);
+    } catch (error) {
+      console.error(error);
     }
+  };
+
+  // Si hay un token, ejecuta la función para cargar las cuentas
+  useEffect(() => {
+    fetchAllAccount();
   }, [token]);
+
 
   // Función para cambiar el estado de la cuenta
   const handleChangeAccountStatus = async (idCuenta: string) => {
+    if (!token) return console.error("No se encontró el token");
     try {
-      console.log("ID enviado:", idCuenta);
-      const response = await fetch(
-        `https://cuenta-proveedores.up.railway.app/api/cuentas/cambiar-estado/${idCuenta}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const updateCuenta = await ChangeAccountStatus(token, idCuenta);
+      console.log("Cuenta actualizada:", updateCuenta);
 
-      if (response.ok) {
-        const updatedAccount = await response.json();
-        console.log("Cuenta actualizada:", updatedAccount);
-
-        // Actualizar la lista de cuentas en el estado
-        setAccount((prev) =>
-          prev.map((account) =>
-            account.id === updatedAccount.id ? updatedAccount : account
-          )
-        );
-      } else {
-        console.error("Error al cambiar el estado de la cuenta");
-        alert("No se pudo cambiar el estado de la cuenta.");
-      }
+      fetchAllAccount()
     } catch (error) {
-      console.error("Error al hacer la solicitud:", error);
+      console.error("Error al cambiar el estado de la cuenta:", error);
       alert("Hubo un error al cambiar el estado de la cuenta.");
     }
   };
 
-  // Filtros dinámicos para cuentas activas e inactivas
-  const validAccounts = Account.filter((account) => account.isValid);
-  const invalidAccounts = Account.filter((account) => !account.isValid);
+  // Obtener la fecha actual
+  const currentDate = new Date();
+
+  // Filtros para cuentas activas e inactivas
+  const validAccounts = Account.filter((account) =>
+    !account.fechaBajaLogicaCuenta || new Date(account.fechaBajaLogicaCuenta) > currentDate
+  );
+
+  const invalidAccounts = Account.filter((account) =>
+    account.fechaBajaLogicaCuenta && new Date(account.fechaBajaLogicaCuenta) <= currentDate
+  );
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
