@@ -31,13 +31,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
-import { getComprobante, createComprobante } from "@/lib/services/comprobantes";
+import { getComprobante, createComprobante, ChangeComprobanteStatus, AsignarMovimiento } from "@/lib/services/comprobantes";
 import { fetchMovimientos } from "@/lib/services/movimientos";
 
 export default function Page() {
   const [comprobantes, setComprobantes] = useState<any[]>([]);
   const [movimientos, setMovimientos] = useState<any[]>([]);
-  const [selectedMovimiento, setSelectedMovimiento] = useState<string | null>(null);
+  const [selectedMovimiento, setSelectedMovimiento,] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     tipoComprobante: "",
@@ -70,28 +70,16 @@ export default function Page() {
     obtenerComprobantes();
   }, [token]);
 
-  // Función para cambiar el estado del comprobante
+  // Función para cambiar estado comprobante
   const handleChangeComprobanteStatus = async (idComprobante: string) => {
+    if (!token) return console.error("No se encontró el token");
     try {
-      const response = await fetch(
-        `https://cuenta-proveedores.up.railway.app/api/comprobantes/cambiar-estado/${idComprobante}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const updatedComprobante = await ChangeComprobanteStatus(token, idComprobante);
+      console.log("Comprobante actualizado:", updatedComprobante);
 
-      if (response.ok) {
-        obtenerComprobantes();
-      } else {
-        console.error("Error al cambiar el estado del comprobante");
-        alert("No se pudo cambiar el estado del comprobante.");
-      }
+      obtenerComprobantes();
     } catch (error) {
-      console.error("Error al hacer la solicitud:", error);
+      console.error("Error al cambiar el estado del comprobante:", error);
       alert("Hubo un error al cambiar el estado del comprobante.");
     }
   };
@@ -135,29 +123,9 @@ export default function Page() {
     if (!token || !selectedMovimiento) {
       return console.error("No se encontró el token o movimiento seleccionado");
     }
-
     try {
-      const response = await fetch(
-        "https://cuenta-proveedores.up.railway.app/api/comprobantes/asignar-comprobante",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            idMovimiento: selectedMovimiento,
-            idComprobante: comprobanteId,
-          }),
-        }
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Error al asignar el movimiento: ${errorData.message || "Error desconocido"}`
-        );
-      }
-
+      const newMovimiento = await AsignarMovimiento(token, selectedMovimiento, comprobanteId);
+      console.log("resultado de asignación: ", newMovimiento)
       obtenerComprobantes();
       setIsModalOpen(false);
     } catch (error) {
