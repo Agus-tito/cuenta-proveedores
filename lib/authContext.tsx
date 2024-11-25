@@ -15,7 +15,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined);
- 
+  
+  const expirationDate = new Date();
+  expirationDate.setDate(expirationDate.getDate() + 1);  //fecha actual mas un dia
+
   const router = useRouter();
 
   useEffect(() => {
@@ -30,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (token: string) => {
     Cookies.set("token", token, {
-      expires: 1,
+      expires: expirationDate, 
       path: "/",
       secure: true,
       sameSite: "strict",

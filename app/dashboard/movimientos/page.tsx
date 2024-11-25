@@ -226,12 +226,7 @@ export default function Page() {
             </h2>
 
             {/* Contenido del modal */}
-            <div className="space-y-4 text-black">
-              <div className="flex justify-between">
-                <span className="font-semibold">ID:</span>
-                <span>{selectedMovimiento.id}</span>
-              </div>
-              <hr />
+            <div className="space-y-4 overflow-y-auto max-h-96 pr-2">
               <div className="flex justify-between">
                 <span className="font-semibold">Importe:</span>
                 <span>${selectedMovimiento.importeMovimiento}</span>
@@ -256,29 +251,49 @@ export default function Page() {
                 </span>
               </div>
               <hr />
-              <div className="flex justify-between">
-                <span className="font-semibold">Cuenta ID:</span>
-                <span>{selectedMovimiento.cuentaId || "Sin asignar"}</span>
-              </div>
-              <hr />
-              <div className="flex justify-between">
-                <span className="font-semibold">Comprobantes:</span>
-                <span>
-                  {selectedMovimiento.comprobantes.length > 0
-                    ? selectedMovimiento.comprobantes.join(", ")
-                    : "Ninguno"}
-                </span>
-              </div>
-              <hr />
-              <div className="flex justify-between">
-                <span className="font-semibold">Validez:</span>
-                <span>
-                  {selectedMovimiento.isValid === null
-                    ? "Sin verificar"
-                    : selectedMovimiento.isValid
-                    ? "Válido"
-                    : "Inválido"}
-                </span>
+              <div>
+                <span className="font-semibold block mb-2">Comprobantes:</span>
+                {selectedMovimiento.comprobantes.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedMovimiento.comprobantes.map((comprobante: any) => (
+                      <div
+                        key={comprobante.id}
+                        className="p-3 bg-gray-100 rounded-md border"
+                      >
+                        <p>
+                          <span className="font-semibold">Tipo:</span>{" "}
+                          {comprobante.tipoComprobante}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Descripción:</span>{" "}
+                          {comprobante.descripcion}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Monto:</span> $
+                          {comprobante.montoComprobante}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Número:</span>{" "}
+                          {comprobante.nroComprobante}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Fecha:</span>{" "}
+                          {new Date(
+                            comprobante.fechaComprobante
+                          ).toLocaleDateString()}
+                        </p>
+                        <p>
+                          <span className="font-semibold">Validez:</span>{" "}
+                          {comprobante.valid ? "Válido" : "Inválido"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">
+                    No hay comprobantes disponibles.
+                  </p>
+                )}
               </div>
             </div>
 
