@@ -25,15 +25,17 @@ import {
   crearMovimiento,
   cambiarEstadoMovimiento,
 } from "@/lib/services/movimientos";
-import { Label } from "@radix-ui/react-dropdown-menu";
+
 import { getAccount } from "@/lib/services/cuentas";
 
 export default function Page() {
   const [movimientos, setMovimientos] = useState<any[]>([]);
-  const [cuentas, setCuentas] = useState<any[]>([]);
   const [movimientosBaja, setMovimientosBaja] = useState<any[]>([]);
   const [selectedMovimiento, setSelectedMovimiento] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cuentas, setCuentas] = useState<any[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  
   const [formData, setFormData] = useState({
     importeMovimiento: 0,
     medioPago: "",
@@ -84,7 +86,7 @@ export default function Page() {
       const nuevo = await crearMovimiento(token, formData);
       if (nuevo) {
         setMovimientos([...movimientos, nuevo]);
-        setIsModalOpen(false);
+        setIsCreateModalOpen(false);
       }
     } catch (error) {
       console.error(error);
@@ -94,7 +96,7 @@ export default function Page() {
   // Para la apertura del modal para ver un movimiento
   const handleVerMovimiento = (movimiento: any) => {
     setSelectedMovimiento(movimiento);
-    setIsModalOpen(true);
+    setIsViewModalOpen(true);
   };
 
   // Función para cambiar el estado del movimiento
@@ -126,7 +128,7 @@ export default function Page() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">Movimientos</CardTitle>
-          <Button onClick={() => setIsModalOpen(true)}>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="md:mr-2 h-4 w-4" />
             <p className="hidden md:block">Agregar Movimientos</p>
           </Button>
@@ -244,7 +246,7 @@ export default function Page() {
         </CardContent>
       </Card>
       {/* Modal para agregar un movimiento */}
-      {isModalOpen && (
+      {isCreateModalOpen  && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-gray-100 p-8 rounded-xl shadow-2xl w-full max-w-lg">
             <h2 className="text-xl text-gray-800 font-semibold mb-6">
@@ -326,7 +328,7 @@ export default function Page() {
 
               <div className="flex justify-end space-x-3">
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => setIsCreateModalOpen(false)}
                   type="button"
                   className="px-4 py-2 bg-red-500 text-black rounded-lg hover:bg-red-300"
                 >
@@ -345,7 +347,7 @@ export default function Page() {
         </div>
       )}
       {/* Modal para mostrar detalles del movimiento */}
-      {isModalOpen && selectedMovimiento && (
+      {isViewModalOpen  && selectedMovimiento && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg text-black">
             <h2 className="text-2xl font-bold text-black-900 border-b pb-3 mb-4">
@@ -425,7 +427,7 @@ export default function Page() {
 
             <div className="flex justify-end mt-6">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => setIsViewModalOpen(false)}
                 className="px-5 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-transform transform hover:scale-105"
               >
                 Cerrar
