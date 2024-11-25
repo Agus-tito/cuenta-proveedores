@@ -1,8 +1,9 @@
 "use client";
 
-import { Plus, Trash } from "lucide-react";
+import { Plus, EyeClosed, Eye, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Table,
   TableBody,
@@ -12,9 +13,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+import { toast } from "sonner"
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
 import { getAccount, createAccount, ChangeAccountStatus } from "@/lib/services/cuentas";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 
 export default function Page() {
   const [Account, setAccount] = useState<any[]>([]);
@@ -25,6 +45,8 @@ export default function Page() {
     numeroCelular: "",
     emailProveedor: "",
     direccionProveedor: "",
+    fechaBajaLogicaCuenta: "",
+    movimiento: ""
   });
 
   const { getToken } = useAuth();
@@ -74,7 +96,17 @@ export default function Page() {
     }
   };
 
-  // Obtener la fecha actual
+  const handleButtonClick = (accountId: any) => {
+    toast("La cuenta proveedor cambió de estado", {
+      action: {
+        label: "Cerrar",
+        onClick: () => console.log("Undo"),
+      },
+    });
+
+    handleChangeAccountStatus(accountId);
+  };
+
   const currentDate = new Date();
 
   // Filtros para cuentas activas e inactivas
@@ -90,7 +122,7 @@ export default function Page() {
     <main className="flex-1 overflow-y-auto p-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-2xl font-bold">Proveedores</CardTitle>
+          <CardTitle className="text-2xl font-bold">Cuentas</CardTitle>
           <Button onClick={() => setIsModalOpen(true)}>
             <Plus className="md:mr-2 h-4 w-4" />
             <p className="hidden md:block">Agregar Proveedor</p>
@@ -101,22 +133,110 @@ export default function Page() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
+                <TableHead>Proveedor</TableHead>
                 <TableHead className="text-center">Saldo</TableHead>
+                <TableHead className="text-center">Email</TableHead>
+                <TableHead className="text-center">Dirección</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {validAccounts.map((account) => (
                 <TableRow key={account.id}>
-                  <TableCell className="font-medium">{account.name}</TableCell>
+                  <TableCell className="font-medium text-sm">{account.name}</TableCell>
+                  <TableCell className="font-medium text-sm">{account.nombreProveedor}</TableCell>
                   <TableCell className="text-center">
                     ${account.saldo ? account.saldo.toLocaleString() : "0"}
                   </TableCell>
+                  <TableCell className="text-center">{account.direccionProveedor}</TableCell>
+                  <TableCell className="text-center">{account.numeroCelular}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button onClick={() => handleChangeAccountStatus(account.id)}>
-                      <Trash className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Cambiar Estado</p>
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="secondary"
+                        >
+                          <ZoomIn />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Proveedor</DialogTitle>
+                          <DialogDescription>
+                            Listado de todos los detalles.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4 grid-cols-2 grid-row-4">
+                          <div>
+                            <p className="font-medium text-sm">Cuenta</p>
+                            <p>{account.name}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">Proveedor</p>
+                            <p>{account.nombreProveedor}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">Número teléfonico</p>
+                            <p>{account.numeroCelular}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">Email</p>
+                            <p>{account.emailProveedor}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">Dirección</p>
+                            <p>{account.direccionProveedor}</p>
+                          </div>
+                        </div>
+                        <p className="font-medium text-sm">Moviminetos</p>
+                        <ScrollArea className="w-full rounded-md border">
+                          <div className="p-4">
+                            <h4 className="text-sm font-medium leading-none"></h4>
+                            <div>
+                              {account.movimiento.map((mov: any, index: any) => (
+                                <div>
+                                  <div key={index} className="w-full grid gap-4 py-4 grid-cols-2 grid-row-4">
+                                    
+                                    <div>
+                                      <p className="font-medium text-sm">Importe:</p>
+                                      <p>${mov.importeMovimiento}</p>
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-sm">Medio de Pago:</p>
+                                      <p>{mov.medioPago}</p>
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-sm">Comentario:</p>
+                                      <p>{mov.comentarioMovimiento}</p>
+                                    </div>
+                                    <div>
+                                      <p className="font-medium text-sm">Fecha:</p>
+                                      <p>{new Date(mov.fechaAltaMovimiento).toLocaleDateString()}</p>
+                                    </div>
+                                  </div>
+                                  <Separator className="my-2" />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </ScrollArea>
+                      </DialogContent>
+                    </Dialog>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleButtonClick(account.id)}
+                          >
+                            <EyeClosed />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Dar de baja</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))}
@@ -127,7 +247,7 @@ export default function Page() {
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Cuentas Dadas de Baja</CardTitle>
+          <CardTitle className="text-2xl font-bold">Cuenta dadas de baja</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -141,14 +261,16 @@ export default function Page() {
             <TableBody>
               {invalidAccounts.map((account) => (
                 <TableRow key={account.id}>
-                  <TableCell className="font-medium">{account.name}</TableCell>
+                  <TableCell className="font-medium text-sm">{account.name}</TableCell>
                   <TableCell className="text-center">
                     ${account.saldo ? account.saldo.toLocaleString() : "0"}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button onClick={() => handleChangeAccountStatus(account.id)}>
-                      <Trash className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Cambiar Estado</p>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleButtonClick(account.id)}
+                    >
+                      <Eye />
                     </Button>
                   </TableCell>
                 </TableRow>

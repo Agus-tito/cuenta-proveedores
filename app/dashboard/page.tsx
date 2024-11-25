@@ -8,6 +8,8 @@ import { getAccount } from "@/lib/services/cuentas";
 import { fetchMovimientos } from "@/lib/services/movimientos";
 import { ArrowLeftRight, CalendarDays, DollarSign, ReceiptText, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Separator } from "@/components/ui/separator"
+
 
 interface Comprobante {
   id: number;
@@ -24,12 +26,17 @@ interface Movimiento {
 interface Cuenta {
   id: number;
   name: string;
+  nombreProveedor: string,
+  numeroCelular: string,
+  emailProveedor: string,
+  direccionProveedor: string,
+  fechaBajaLogicaCuenta: string,
 }
 
 export default function Page() {
-  const [comprobantes, setComprobantes] = useState<Comprobante[]>([]); 
-  const [cuentas, setCuentas] = useState<Cuenta[]>([]); 
-  const [movimientos, setMovimientos] = useState<Movimiento[]>([]); 
+  const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
+  const [cuentas, setCuentas] = useState<Cuenta[]>([]);
+  const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
 
 
   const { getToken } = useAuth();
@@ -108,13 +115,24 @@ export default function Page() {
               </CardHeader>
               <ScrollArea className="h-[200px] w-full">
                 <CardContent>
-                  <div className="space-y-8">
+                  <div>
                     {cuentas.slice(0, 10).map((cuenta) => (
-                      <div key={cuenta.id} className="flex items-center">
-                        <div className="ml-4 space-y-1">
-                          <p className="text-sm font-medium leading-none">{cuenta.name}</p>
+                      <div>
+                        <div key={cuenta.id} className="flex items-center justify-between my-2">
+                          <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none">{cuenta.nombreProveedor}</p>
+                            <p className="text-xs">{cuenta.emailProveedor}</p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm">{cuenta.name}</p>
+                          </div>
+                          <div className="mr-4 space-y-1">
+                            <p className="text-sm">{cuenta.direccionProveedor}</p>
+                          </div>
                         </div>
+                        <Separator />
                       </div>
+
                     ))}
                   </div>
                 </CardContent>
