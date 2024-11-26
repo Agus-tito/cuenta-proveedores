@@ -118,6 +118,14 @@ export default function Page() {
     account.fechaBajaLogicaCuenta && new Date(account.fechaBajaLogicaCuenta) <= currentDate
   );
 
+  // Función para calcular el saldo de una cuenta basado en todos sus movimientos
+const calculateSaldo = (movimientos: any[]) => {
+  return movimientos.reduce((saldo, movimiento) => {
+    return saldo + movimiento.importeMovimiento; // Suma todos los importes
+  }, 0);
+};
+
+
   return (
     <main className="flex-1 overflow-y-auto p-6">
       <Card>
@@ -146,7 +154,7 @@ export default function Page() {
                   <TableCell className="font-medium text-sm">{account.name}</TableCell>
                   <TableCell className="font-medium text-sm">{account.nombreProveedor}</TableCell>
                   <TableCell className="text-center">
-                    ${account.saldo ? account.saldo.toLocaleString() : "0"}
+                  ${calculateSaldo(account.movimiento).toLocaleString()}
                   </TableCell>
                   <TableCell className="text-center">{account.direccionProveedor}</TableCell>
                   <TableCell className="text-center">{account.numeroCelular}</TableCell>
