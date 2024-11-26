@@ -196,7 +196,7 @@ export default function Page() {
                               {account.movimiento.map((mov: any, index: any) => (
                                 <div>
                                   <div key={index} className="w-full grid gap-4 py-4 grid-cols-2 grid-row-4">
-                                    
+
                                     <div>
                                       <p className="font-medium text-sm">Importe:</p>
                                       <p>${mov.importeMovimiento}</p>
@@ -281,66 +281,98 @@ export default function Page() {
       </Card>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-gray-100 p-8 rounded-xl shadow-2xl w-full max-w-lg">
-            <h2 className="text-xl text-gray-800 font-semibold mb-6">Agregar Proveedor</h2>
+        <div className="text-black dark:text-zinc-300 fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg dark:bg-zinc-900 border-[1px]">
+            <h2 className="text-xl font-semibold mb-6">Agregar Proveedor</h2>
             <form>
-              <input
-                type="text"
-                name="name"
-                placeholder="Nombre"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full mb-4 p-3 border rounded-lg bg-gray-50 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <input
-                type="text"
-                name="nombreProveedor"
-                placeholder="Nombre del Proveedor"
-                value={formData.nombreProveedor}
-                onChange={handleInputChange}
-                className="w-full mb-4 p-3 border rounded-lg bg-gray-50 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <input
-                type="text"
-                name="numeroCelular"
-                placeholder="Número de Celular"
-                value={formData.numeroCelular}
-                onChange={handleInputChange}
-                className="w-full mb-4 p-3 border rounded-lg bg-gray-50 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <input
-                type="email"
-                name="emailProveedor"
-                placeholder="Email"
-                value={formData.emailProveedor}
-                onChange={handleInputChange}
-                className="w-full mb-4 p-3 border rounded-lg bg-gray-50 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <input
-                type="text"
-                name="direccionProveedor"
-                placeholder="Dirección"
-                value={formData.direccionProveedor}
-                onChange={handleInputChange}
-                className="w-full mb-4 p-3 border rounded-lg bg-gray-50 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-
-              <div className="flex justify-end space-x-3">
-                <button
+              <div className="mb-4">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                >
+                  Nombre
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="nombreProveedor"
+                  className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                >
+                  Nombre del Proveedor
+                </label>
+                <input
+                  type="text"
+                  name="nombreProveedor"
+                  value={formData.nombreProveedor}
+                  onChange={handleInputChange}
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="numeroCelular"
+                  className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                >
+                  Número de Celular
+                </label>
+                <input
+                  type="text"
+                  name="numeroCelular"
+                  value={formData.numeroCelular}
+                  onChange={handleInputChange}
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="emailProveedor"
+                  className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="emailProveedor"
+                  value={formData.emailProveedor}
+                  onChange={handleInputChange}
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                />
+              </div>
+              <div className="mb-4">
+                <label
+                  htmlFor="direccionProveedor"
+                  className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                >
+                  Dirección
+                </label>
+                <input
+                  type="text"
+                  name="direccionProveedor"
+                  value={formData.direccionProveedor}
+                  onChange={handleInputChange}
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                />
+              </div>
+              <div className="flex justify-between space-x-3">
+                <Button
                   onClick={() => setIsModalOpen(false)}
-                  type="button"
-                  className="px-4 py-2 bg-red-500 text-black rounded-lg hover:bg-red-300"
+                  variant="secondary"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleCreateAccount}
                   type="button"
-                  className="px-4 py-2 bg-blue-500 text-black rounded-lg hover:bg-blue-300"
                 >
                   Guardar
-                </button>
+                </Button>
               </div>
             </form>
           </div>

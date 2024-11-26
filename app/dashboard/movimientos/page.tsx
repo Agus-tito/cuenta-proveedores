@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash, Eye } from "lucide-react";
+import { Plus, EyeClosed, Eye, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,6 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import {
   Select,
   SelectContent,
@@ -18,6 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
 import {
@@ -35,7 +45,7 @@ export default function Page() {
   const [cuentas, setCuentas] = useState<any[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     importeMovimiento: 0,
     medioPago: "",
@@ -122,6 +132,18 @@ export default function Page() {
     }
   };
 
+  const handleButtonClick = (movimiento: any) => {
+    toast("El movimiento cambió de estado", {
+      action: {
+        label: "Cerrar",
+        onClick: () => console.log("Undo"),
+      },
+    });
+
+    handleCambiarEstado(movimiento);
+  };
+
+
   return (
     <main className="flex-1 overflow-y-auto p-6">
       {/* Tabla de movimientos activos */}
@@ -161,26 +183,48 @@ export default function Page() {
                   <TableCell className="text-center">
                     {movimiento.fechaAltaMovimiento
                       ? new Date(movimiento.fechaAltaMovimiento).toLocaleString(
-                          "es-AR",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "numeric",
-                          }
-                        )
+                        "es-AR",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "numeric",
+                        }
+                      )
                       : "Fecha no disponible"}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button onClick={() => handleCambiarEstado(movimiento)}>
-                      <Trash className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Dar Baja</p>
-                    </Button>
-                    <Button onClick={() => handleVerMovimiento(movimiento)}>
-                      <Eye className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Ver</p>
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleVerMovimiento(movimiento)}
+                          >
+                            <ZoomIn />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ver detalles</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleButtonClick(movimiento)}
+                          >
+                            <EyeClosed />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Dar de baja</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))}
@@ -234,10 +278,21 @@ export default function Page() {
                     )}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button onClick={() => handleCambiarEstado(movimiento)}>
-                      <Plus className="md:mr-2 h-4 w-4" />
-                      <p className="hidden md:block">Dar Alta</p>
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleButtonClick(movimiento)}
+                          >
+                            <Eye />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Dar de alta</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))}
@@ -246,17 +301,17 @@ export default function Page() {
         </CardContent>
       </Card>
       {/* Modal para agregar un movimiento */}
-      {isCreateModalOpen  && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-gray-100 p-8 rounded-xl shadow-2xl w-full max-w-lg">
-            <h2 className="text-xl text-gray-800 font-semibold mb-6">
+      {isCreateModalOpen && (
+        <div className="text-black dark:text-zinc-300 fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg dark:bg-zinc-900 border-[1px]">
+            <h2 className="text-xl font-semibold mb-6">
               Agregar Movimiento
             </h2>
             <form>
               <div className="mb-4">
                 <label
                   htmlFor="importeMovimiento"
-                  className="block text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
                 >
                   Importe
                 </label>
@@ -266,12 +321,12 @@ export default function Page() {
                   id="importeMovimiento"
                   value={formData.importeMovimiento}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
                 />
               </div>
 
               <div className="mb-4">
-                <label htmlFor="medioPago" className="block text-gray-700 mb-2">
+                <label htmlFor="medioPago" className="block text-sm font-medium text-gray-700 dark:text-zinc-400">
                   Medio de Pago
                 </label>
                 <input
@@ -280,14 +335,14 @@ export default function Page() {
                   id="medioPago"
                   value={formData.medioPago}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
                 />
               </div>
 
               <div className="mb-4">
                 <label
                   htmlFor="comentarioMovimiento"
-                  className="block text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
                 >
                   Comentario
                 </label>
@@ -297,14 +352,14 @@ export default function Page() {
                   id="comentarioMovimiento"
                   value={formData.comentarioMovimiento}
                   onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
                 />
               </div>
 
               <div className="mb-4">
                 <label
                   htmlFor="cuentaId"
-                  className="block text-sm font-medium text-black"
+                  className="block text-sm font-medium pb-2"
                 >
                   Asignar Cuenta
                 </label>
@@ -326,31 +381,31 @@ export default function Page() {
                 </Select>
               </div>
 
-              <div className="flex justify-end space-x-3">
-                <button
+              <div className="flex justify-between space-x-3">
+                <Button
                   onClick={() => setIsCreateModalOpen(false)}
                   type="button"
-                  className="px-4 py-2 bg-red-500 text-black rounded-lg hover:bg-red-300"
+                  variant="secondary"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleCrearMovimiento}
                   type="button"
-                  className="px-4 py-2 bg-blue-500 text-black rounded-lg hover:bg-blue-300"
                 >
                   Guardar
-                </button>
+                </Button>
               </div>
             </form>
           </div>
         </div>
       )}
+
       {/* Modal para mostrar detalles del movimiento */}
-      {isViewModalOpen  && selectedMovimiento && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-lg text-black">
-            <h2 className="text-2xl font-bold text-black-900 border-b pb-3 mb-4">
+      {isViewModalOpen && selectedMovimiento && (
+        <div className="text-black dark:text-zinc-300 fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg dark:bg-zinc-900 border-[1px]">
+            <h2 className="text-2xl font-bold border-b pb-3 mb-4">
               Detalle del Movimiento
             </h2>
 
@@ -386,7 +441,7 @@ export default function Page() {
                     {selectedMovimiento.comprobantes.map((comprobante: any) => (
                       <div
                         key={comprobante.id}
-                        className="p-3 bg-gray-100 rounded-md border"
+                        className="p-3 bg-gray-100 dark:bg-zinc-900 rounded-md border"
                       >
                         <p>
                           <span className="font-semibold">Tipo:</span>{" "}
@@ -426,12 +481,11 @@ export default function Page() {
             </div>
 
             <div className="flex justify-end mt-6">
-              <button
+              <Button
                 onClick={() => setIsViewModalOpen(false)}
-                className="px-5 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-transform transform hover:scale-105"
               >
                 Cerrar
-              </button>
+              </Button>
             </div>
           </div>
         </div>

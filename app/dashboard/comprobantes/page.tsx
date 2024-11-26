@@ -1,8 +1,9 @@
 "use client";
 
-import { Plus, Trash, Eye } from "lucide-react";
+import { Plus, EyeClosed, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Table,
   TableBody,
@@ -11,6 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import {
   Select,
   SelectContent,
@@ -18,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
   Dialog,
   DialogClose,
@@ -28,6 +38,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
@@ -105,10 +117,15 @@ export default function Page() {
   const handleCreateComprobante = async () => {
     if (!token) return console.error("No se encontró el token");
     try {
-      const newComprobante = await createComprobante(token, {
+      const dataToSend = {
         ...formData,
         movimientoId: selectedMovimiento,
-      });
+      };
+
+      console.log('Datos enviados:', dataToSend);
+
+      const newComprobante = await createComprobante(token, dataToSend);
+
       if (newComprobante) {
         setIsModalOpen(false);
         setComprobantes((prev) => [...prev, newComprobante]);
@@ -131,6 +148,17 @@ export default function Page() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleButtonClick = (idComprobante: any) => {
+    toast("El comprobante cambió de estado", {
+      action: {
+        label: "Cerrar",
+        onClick: () => console.log("Undo"),
+      },
+    });
+
+    handleChangeComprobanteStatus(idComprobante);
   };
 
   return (
@@ -168,9 +196,10 @@ export default function Page() {
                     <TableCell className="text-right space-x-2">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button>
-                            <Plus className="md:mr-2 h-4 w-4" />
-                            <p className="hidden md:block">Asignar</p>
+                          <Button
+                            variant="secondary"
+                          >
+                            <Plus />
                           </Button>
                         </DialogTrigger>
 
@@ -212,10 +241,21 @@ export default function Page() {
                           </DialogFooter>
                         </DialogContent>
                       </Dialog>
-                      <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
-                        <Trash className="md:mr-2 h-4 w-4" />
-                        <p className="hidden md:block">Cambiar Estado</p>
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="secondary"
+                              onClick={() => handleButtonClick(comprobante.id)}
+                            >
+                              <EyeClosed />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Dar de baja</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 );
@@ -224,13 +264,10 @@ export default function Page() {
           </Table>
         </CardContent>
       </Card>
+
       <Card className="mt-6">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">Comprobantes dados de baja</CardTitle>
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="md:mr-2 h-4 w-4" />
-            <p className="hidden md:block">Agregar Comprobante</p>
-          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -260,10 +297,21 @@ export default function Page() {
                       </TableCell>
                       <TableCell>{movimiento ? movimiento.comentarioMovimiento : 'Sin comentario'}</TableCell> {/* Mostrar comentario */}
                       <TableCell className="text-right space-x-2">
-                        <Button onClick={() => handleChangeComprobanteStatus(comprobante.id)}>
-                          <Trash className="md:mr-2 h-4 w-4" />
-                          <p className="hidden md:block">Cambiar Estado</p>
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="secondary"
+                                onClick={() => handleButtonClick(comprobante.id)}
+                              >
+                                <Eye />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Dar de baja</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                     </TableRow>
                   );
@@ -276,138 +324,141 @@ export default function Page() {
 
       {/* Modal de agregar comprobante */}
       {isModalOpen && (
-        <div className="text-black fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
+        <div className="text-black dark:text-zinc-300 fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg dark:bg-zinc-900 border-[1px]">
             <h2 className="text-xl font-semibold mb-6">Agregar Comprobante</h2>
-            <form>
-              {/* Tipo de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="tipoComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Tipo de Comprobante
-                </label>
-                <input
-                  id="tipoComprobante"
-                  name="tipoComprobante"
-                  type="text"
-                  value={formData.tipoComprobante}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
-                />
-              </div>
+            <form onSubmit={(e) => {
+              e.preventDefault(); // Previene la recarga de la página
+              handleCreateComprobante(); // Llama a la función para crear el comprobante
+            }}>
+              <div className="grid grid-cols-2 gap-4">
 
-              {/* Descripción */}
-              <div className="mb-4">
-                <label
-                  htmlFor="descripcion"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Descripción
-                </label>
-                <input
-                  id="descripcion"
-                  name="descripcion"
-                  type="text"
-                  value={formData.descripcion}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
-                />
-              </div>
-
-              {/* Número de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="nroComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Número de Comprobante
-                </label>
-                <input
-                  id="nroComprobante"
-                  name="nroComprobante"
-                  type="number"
-                  value={formData.nroComprobante}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
-                />
-              </div>
-
-              {/* Fecha de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="fechaComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Fecha de Comprobante
-                </label>
-                <input
-                  id="fechaComprobante"
-                  name="fechaComprobante"
-                  type="date"
-                  value={formData.fechaComprobante}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
-                />
-              </div>
-
-              {/* Monto de comprobante */}
-              <div className="mb-4">
-                <label
-                  htmlFor="montoComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Monto de Comprobante
-                </label>
-                <input
-                  id="montoComprobante"
-                  name="montoComprobante"
-                  type="number"
-                  value={formData.montoComprobante}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg bg-gray-50 text-black"
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="montoComprobante"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Asignar Movimiento
-                </label>
-                <div className="grid flex-1 gap-2">
-                  <Label htmlFor="link" className="sr-only">
-                    Movimientos
-                  </Label>
-                  <Select
-                    onValueChange={(value: any) => setSelectedMovimiento(value)}
+                {/* Tipo de comprobante */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="tipoComprobante"
+                    className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
                   >
-                    <SelectTrigger id="movimiento">
-                      <SelectValue placeholder="Selecciona un movimiento" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      {movimientos.map((movimiento) => (
-                        <SelectItem key={movimiento.id} value={movimiento.id}>
-                          {movimiento.comentarioMovimiento}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    Tipo de Comprobante
+                  </label>
+                  <input
+                    id="tipoComprobante"
+                    name="tipoComprobante"
+                    type="text"
+                    value={formData.tipoComprobante}
+                    onChange={handleInputChange}
+                    className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                  />
+                </div>
+
+                {/* Descripción */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="descripcion"
+                    className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                  >
+                    Descripción
+                  </label>
+                  <input
+                    id="descripcion"
+                    name="descripcion"
+                    type="text"
+                    value={formData.descripcion}
+                    onChange={handleInputChange}
+                    className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                  />
+                </div>
+
+                {/* Número de comprobante */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="nroComprobante"
+                    className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                  >
+                    Número de Comprobante
+                  </label>
+                  <input
+                    id="nroComprobante"
+                    name="nroComprobante"
+                    type="number"
+                    value={formData.nroComprobante}
+                    onChange={handleInputChange}
+                    className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                  />
+                </div>
+
+                {/* Fecha de comprobante */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="fechaComprobante"
+                    className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                  >
+                    Fecha de Comprobante
+                  </label>
+                  <input
+                    id="fechaComprobante"
+                    name="fechaComprobante"
+                    type="date"
+                    value={formData.fechaComprobante}
+                    onChange={handleInputChange}
+                    className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                  />
+                </div>
+
+                {/* Monto de comprobante */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="montoComprobante"
+                    className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                  >
+                    Monto de Comprobante
+                  </label>
+                  <input
+                    id="montoComprobante"
+                    name="montoComprobante"
+                    type="number"
+                    value={formData.montoComprobante}
+                    onChange={handleInputChange}
+                    className="w-full p-[5px] border rounded-lg bg-gray-50 text-black dark:bg-zinc-950 dark:text-white"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="montoComprobante"
+                    className="block text-sm font-medium text-gray-700 dark:text-zinc-400"
+                  >
+                    Asignar Movimiento
+                  </label>
+                  <div className="grid flex-1 gap-2">
+                    <Label htmlFor="link" className="sr-only">
+                      Movimientos
+                    </Label>
+                    <Select
+                      onValueChange={(value: any) => setSelectedMovimiento(value)}
+                    >
+                      <SelectTrigger id="movimiento">
+                        <SelectValue placeholder="Selecciona un movimiento" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        {movimientos.map((movimiento) => (
+                          <SelectItem key={movimiento.id} value={movimiento.id}>
+                            {movimiento.comentarioMovimiento}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-between space-x-3 pt-5">
                 <Button
                   onClick={() => setIsModalOpen(false)}
-                  className="bg-red-500 hover:bg-red-300 text-white"
+                  variant="secondary"
                 >
                   Cancelar
                 </Button>
-                <Button
-                  onClick={handleCreateComprobante}
-                  className="bg-blue-500 hover:bg-blue-300 text-white"
-                >
+                <Button type="submit">
                   Guardar
                 </Button>
               </div>
