@@ -159,8 +159,7 @@ export default function Page() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-start">ID</TableHead>
-                <TableHead className="text-center">Importe</TableHead>
+                <TableHead className="text-start">Importe</TableHead>
                 <TableHead className="text-center">Medio de Pago</TableHead>
                 <TableHead className="text-center">Comentario</TableHead>
                 <TableHead className="text-center">Fecha Alta</TableHead>
@@ -170,8 +169,7 @@ export default function Page() {
             <TableBody>
               {movimientos.map((movimiento) => (
                 <TableRow key={movimiento.id}>
-                  <TableCell className="font-medium">{movimiento.id}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-start font-medium">
                     ${movimiento.importeMovimiento?.toLocaleString() || "0"}
                   </TableCell>
                   <TableCell className="text-center">
@@ -244,7 +242,6 @@ export default function Page() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-start">ID</TableHead>
                 <TableHead className="text-center">Importe</TableHead>
                 <TableHead className="text-center">Medio de Pago</TableHead>
                 <TableHead className="text-center">Comentario</TableHead>
@@ -255,7 +252,6 @@ export default function Page() {
             <TableBody>
               {movimientosBaja.map((movimiento) => (
                 <TableRow key={movimiento.id}>
-                  <TableCell className="font-medium">{movimiento.id}</TableCell>
                   <TableCell className="text-center">
                     ${movimiento.importeMovimiento}
                   </TableCell>
